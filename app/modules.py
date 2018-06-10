@@ -154,6 +154,9 @@ class Admin(db.Model):
     def __repr__(self):
         return "<Admin %r>" % self.id
 
+    def check_pwd(self, pwd):
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.pwd, pwd)
 
 # 管理员日志
 class Adminlog(db.Model):
