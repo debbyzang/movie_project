@@ -1,42 +1,38 @@
-#coding:utf8
+# coding:utf8
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField
 from wtforms.validators import DataRequired, ValidationError
 from app.modules import Admin
 
+
 class LoginForm(FlaskForm):
     account = StringField(
-        label="账号",
+        "账号",
         validators=[
-            DataRequired("请输入账号")
+            DataRequired(message="请输入账号"),
         ],
-        description="账号",
         render_kw={
-            "class":"form-control",
-            "placeholder":"请输入账号！",
-            # "required":"required"
+            "class": "form-control",
+            "placeholder": "请输入账号！",
         }
     )
 
     pwd = PasswordField(
-        label="密码",
+        "密码",
         validators=[
-            DataRequired("请输入密码")
+            DataRequired(message="请输入密码"),
         ],
-        description="密码",
         render_kw={
             "class": "form-control",
             "placeholder": "请输入密码！",
-            # "required": "required"
         }
     )
 
     submit = SubmitField(
-        label="提交",
-        description="提交",
+        "提交",
         render_kw={
-            "class":"btn btn-primary btn-block btn-flat"
+            "class": "btn btn-primary btn-block btn-flat"
         }
     )
 
@@ -45,3 +41,34 @@ class LoginForm(FlaskForm):
         admin = Admin.query.filter_by(name=account).count()
         if admin == 0:
             raise ValidationError('账号不存在')
+
+
+class TagForm(FlaskForm):
+    name = StringField(
+        '标签',
+        description='请输入标签',
+        validators=[
+            DataRequired("请输入标签！")
+        ],
+        render_kw={
+            "class": "form-control",
+            "id": "input_name",
+            "placeholder": "请输入标签名称！",
+
+        }
+    )
+
+    submit = SubmitField(
+        "添加",
+        render_kw={
+            "class": "btn btn-primary"
+
+        }
+    )
+    edit = SubmitField(
+        "编辑",
+        render_kw={
+            "class": "btn btn-primary"
+
+        }
+    )

@@ -52,7 +52,7 @@ class Tag(db.Model):
     movies = db.relationship("Movie", backref="tag")
 
     def __repr__(self):
-        return "<Tag %r>" % self.name
+        return "<Tag %r>" % self.id
 
 
 # 电影
