@@ -77,6 +77,7 @@ class Movie(db.Model):
     def __repr__(self):
         return "Movie %r" % self.title
 
+
 # 上映预告
 class Preview(db.Model):
     __tablename__ = "preview"
@@ -100,6 +101,7 @@ class Comment(db.Model):
 
     def __repr__(self):
         return "<Comment %r>" % self.id
+
 
 # 电影收藏
 class Moviecol(db.Model):
@@ -145,7 +147,7 @@ class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True)
     pwd = db.Column(db.String(100))
-    is_super = db.Column(db.SmallInteger) #0是超级管理员
+    is_super = db.Column(db.SmallInteger)  # 0是超级管理员
     role_id = db.Column(db.Integer, db.ForeignKey("role.id"))
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow())
     adminlogs = db.relationship("Adminlog", backref="admin")
@@ -157,6 +159,7 @@ class Admin(db.Model):
     def check_pwd(self, pwd):
         from werkzeug.security import check_password_hash
         return check_password_hash(self.pwd, pwd)
+
 
 # 管理员日志
 class Adminlog(db.Model):
@@ -178,7 +181,6 @@ class Oplog(db.Model):
     ip = db.Column(db.String(100))
     reason = db.Column(db.String(600))
     addtime = db.Column(db.DateTime, index=True, default=datetime.utcnow())
-
 
     def __repr__(self):
         return "<Oplog %r>" % self.id
