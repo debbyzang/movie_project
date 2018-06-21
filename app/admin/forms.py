@@ -1,9 +1,11 @@
 # coding:utf8
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField
+from wtforms import StringField, SubmitField, PasswordField, FileField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, ValidationError
-from app.modules import Admin
+from app.modules import Admin, Tag
+
+tags = Tag.query.all()
 
 
 class LoginForm(FlaskForm):
@@ -72,3 +74,109 @@ class TagForm(FlaskForm):
 
         }
     )
+
+
+class MovieForm(FlaskForm):
+    title = StringField(
+        "片名",
+        validators=[
+            DataRequired("请输入片名")
+        ],
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入片名！"
+        }
+    )
+    url = FileField(
+        "文件",
+        validators=[
+            DataRequired("请上传文件")
+        ]
+    )
+    info = TextAreaField(
+        "简介",
+        validators=[
+            DataRequired("请输入简介")
+        ],
+        render_kw={
+            "class": "form-control",
+            "rows": "10"
+        }
+    )
+    logo = FileField(
+        "封面",
+        validators=[
+            DataRequired("请上传封面")
+        ]
+    )
+    star = SelectField(
+        "星级",
+        validators=[
+            DataRequired("请选择星级")
+        ],
+        coerce=int,
+        choices=[(1, "1星"),(2, "2星"),(3, "3星"),(4, "4星"),(5, "5星")],
+        render_kw={
+            "class": "form-control",
+            "id": "input_star"
+        }
+    )
+    tag_id = SelectField(
+        "标签",
+        validators=[
+            DataRequired("请选择标签")
+        ],
+        coerce=int,
+        choices=[(v.id, v.name) for v in tags],
+        render_kw={
+            "class": "form-control",
+            "id": "input_star"
+        }
+    )
+    area = StringField(
+        "地区",
+        validators=[
+            DataRequired("请输入地区")
+        ],
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入地区！"
+        }
+    )
+
+    length = StringField(
+        "片长",
+        validators=[
+            DataRequired("请输入片长")
+        ],
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请输入片长！"
+        }
+    )
+    release_time = StringField(
+        "上映时间",
+        validators=[
+            DataRequired("请选择上映时间")
+        ],
+        render_kw={
+            "class": "form-control",
+            "placeholder": "请选择上映时间！",
+            "id":"input_release_time"
+        }
+    )
+    submit = SubmitField(
+        "添加",
+        render_kw={
+            "class": "btn btn-primary"
+
+        }
+    )
+    edit = SubmitField(
+        "编辑",
+        render_kw={
+            "class": "btn btn-primary"
+
+        }
+    )
+

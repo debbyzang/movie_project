@@ -2,7 +2,7 @@
 
 from . import admin
 from flask import url_for, render_template, redirect, flash, request, session
-from app.admin.forms import LoginForm, TagForm
+from app.admin.forms import LoginForm, TagForm, MovieForm
 from app.modules import Admin, Tag, db
 from functools import wraps
 
@@ -121,7 +121,8 @@ def tag_del(id=None):
 
 @admin.route("/movie/add")
 def movie_add():
-    return render_template("admin/movie_add.html")
+    form = MovieForm()
+    return render_template("admin/movie_add.html", form=form)
 
 
 @admin.route("/movie/list")
