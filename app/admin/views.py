@@ -26,7 +26,8 @@ def change_filename(filename):
     fileinfo = os.path.splitext(filename)
     print("fileinfo: " + str(fileinfo))
     print("fileinfo[0]: " + str(fileinfo[0]))
-    filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().hex) + "."+fileinfo[0]
+    # todo file suffix name confused
+    filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().hex) + "." + fileinfo[-1]
     print("filename: " + filename)
     return filename
 
@@ -148,7 +149,7 @@ def movie_add():
             os.makedirs(app.config["UP_DIR"])
             os.chmod(app.config["UP_DIR"], stat.S_IRWXU)
         url = change_filename(file_url)
-        print("url "+url)
+        print("url " + url)
         logo = change_filename(file_logo)
         form.url.data.save(app.config["UP_DIR"] + url)
         form.logo.data.save(app.config["UP_DIR"] + logo)
@@ -203,34 +204,42 @@ def movie_del(id=None):
 def movie_edit(id):
     form = MovieForm()
     movie = Movie.query.get_or_404(int(id))
+    form.url.validators = []
+    form.logo.validators = []
     if request.method == "GET":
         form.info.data = movie.info
         form.tag_id.data = movie.tag_id
         form.star.data = movie.star
     if form.validate_on_submit():
         data = form.data
-        # file_url = secure_filename(form.url.data.filename)
-        # file_logo = secure_filename(form.logo.data.filename)
-        # if not os.path.exists(app.config["UP_DIR"]):
-        #     os.makedirs(app.config["UP_DIR"])
-        #     os.chmod(app.config["UP_DIR"], "rw")
-        # url = change_filename(file_url)
-        # logo = change_filename(file_logo)
-        # movie = Movie(
-        #     title=data['title'],
-        #     url=url,
-        #     info=data['info'],
-        #     logo=logo,
-        #     star=int(data['star']),
-        #     playnum=0,
-        #     commentnum=0,
-        #     tag_id=int(data['tag_id']),
-        #     area=data['area'],
-        #     release_time=data['release_time'],
-        #     length=data['length']
-        # )
-        # db.session.add(movie)
-        # db.session.commit()
+        movie_count = Movie.query.filter_by(title=data['title']).count()
+        if movie_count >= 1 and movie.title != data['title']:
+            flash("片名已存在", "err")
+            return redirect(url_for("admin.movie_edit", id=movie.id))
+
+        if not os.path.exists(app.config["UP_DIR"]):
+            os.makedirs(app.config["UP_DIR"])
+            os.chmod(app.config["UP_DIR"], stat.S_IRWXU)
+
+        if form.url.data != "":
+            file_url = secure_filename(form.url.data.filename)
+            movie.url = change_filename(file_url)
+            form.url.data.save(app.config["UP_DIR"] + movie.url)
+
+        if form.logo.data != "":
+            file_logo = secure_filename(form.logo.data.filename)
+            movie.logo = change_filename(file_logo)
+            form.logo.data.save(app.config['UP_DIR'] + movie.logo)
+
+        movie.title = data['title']
+        movie.info = data['info']
+        movie.star = data['star']
+        movie.tag_id = data['tag_id']
+        movie.area = data['area']
+        movie.release_time = data['release_time']
+        movie.length = data['length']
+        db.session.add(movie)
+        db.session.commit()
         flash("编辑电影成功", "ok")
         return redirect(url_for("admin.movie_edit", id=movie.id))
     return render_template("admin/movie_edit.html", form=form, movie=movie)
