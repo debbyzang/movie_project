@@ -173,7 +173,7 @@ class MovieForm(FlaskForm):
         }
     )
     edit = SubmitField(
-        "编辑",
+        "提交",
         render_kw={
             "class": "btn btn-primary"
 
