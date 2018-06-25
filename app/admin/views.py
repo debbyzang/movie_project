@@ -2,8 +2,8 @@
 
 from . import admin
 from flask import url_for, render_template, redirect, flash, request, session
-from app.admin.forms import LoginForm, TagForm, MovieForm
-from app.modules import Admin, Tag, Movie, db
+from app.admin.forms import LoginForm, TagForm, MovieForm, PreviewForm
+from app.modules import Admin, Tag, Movie, db, Preview
 from app import app
 from functools import wraps
 from werkzeug.utils import secure_filename
@@ -24,11 +24,8 @@ def admin_login_req(f):
 # 修改文件名
 def change_filename(filename):
     fileinfo = os.path.splitext(filename)
-    print("fileinfo: " + str(fileinfo))
-    print("fileinfo[0]: " + str(fileinfo[0]))
     # todo file suffix name confused
-    filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().hex) + "." + fileinfo[-1]
-    print("filename: " + filename)
+    filename = datetime.datetime.now().strftime("%Y%m%d%H%M%S") + str(uuid.uuid4().hex) + "." + fileinfo[0]
     return filename
 
 
@@ -245,10 +242,27 @@ def movie_edit(id):
     return render_template("admin/movie_edit.html", form=form, movie=movie)
 
 
-@admin.route("/preview/add")
+@admin.route("/preview/add", methods=["GET","POST"])
 @admin_login_req
 def preview_add():
-    return render_template("admin/preview_add.html")
+    form = PreviewForm()
+    if form.validate_on_submit():
+        data = form.data
+        file_logo = secure_filename(form.logo.data.filename)
+        if not os.path.exists(app.config["UP_DIR"]):
+            os.makedirs(app.config["UP_DIR"])
+            os.chmod(app.config["UP_DIR"], stat.S_IRWXU)
+        logo = change_filename(file_logo)
+        form.logo.data.save(app.config["UP_DIR"] + logo)
+        preview = Preview(
+            title = data['title'],
+            logo = logo
+        )
+        db.session.add(preview)
+        db.session.commit()
+        flash("添加预告成功", "ok")
+        return redirect(url_for("admin.preview_add"))
+    return render_template("admin/preview_add.html", form=form)
 
 
 @admin.route("/preview/list")
