@@ -3,7 +3,7 @@
 from . import admin
 from flask import url_for, render_template, redirect, flash, request, session
 from app.admin.forms import LoginForm, TagForm, MovieForm, PreviewForm
-from app.modules import Admin, Tag, Movie, db, Preview, User
+from app.modules import Admin, Tag, Movie, db, Preview, User, Comment, Moviecol
 from app import app
 from functools import wraps
 from werkzeug.utils import secure_filename
@@ -353,12 +353,36 @@ def user_del(id=None):
     ).paginate(page=1, per_page=10)
     return render_template("admin/user_list.html", page_data=page_data)
 
-
-@admin.route("/comment/list")
+# 评论列表
+@admin.route("/comment/list/<int:page>/")
 @admin_login_req
-def comment_list():
-    return render_template("admin/comment_list.html")
+def comment_list(page=None):
+    if page == None:
+        page = 1
+    page_data = Comment.query.join(
+        Movie
+    ).join(
+        User
+    ).filter(
+        Movie.id == Comment.movie_id,
+        User.id == Comment.user_id
+    ).order_by(
+        Comment.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/comment_list.html", page_data=page_data)
 
+# 删除评论
+@admin.route("/comment/del/<int:id>/", methods=["GET"])
+@admin_login_req
+def comment_del(id=None):
+    comment = Comment.query.get_or_404(int(id))
+    db.session.delete(comment)
+    db.session.commit()
+    flash("删除评论成功", "ok")
+    page_data = Comment.query.order_by(
+        Comment.addtime.desc()
+    ).paginate(page=1, per_page=10)
+    return render_template("admin/comment_list.html", page_data=page_data)
 
 @admin.route("/moviecol/list")
 @admin_login_req
