@@ -340,6 +340,7 @@ def user_view(id=None):
     user = User.query.get_or_404(int(id))
     return render_template("admin/user_view.html", user=user)
 
+
 # 删除会员
 @admin.route("/user/del/<int:id>/", methods=["GET"])
 @admin_login_req
@@ -352,6 +353,7 @@ def user_del(id=None):
         User.addtime.desc()
     ).paginate(page=1, per_page=10)
     return render_template("admin/user_list.html", page_data=page_data)
+
 
 # 评论列表
 @admin.route("/comment/list/<int:page>/")
@@ -371,6 +373,7 @@ def comment_list(page=None):
     ).paginate(page=page, per_page=10)
     return render_template("admin/comment_list.html", page_data=page_data)
 
+
 # 删除评论
 @admin.route("/comment/del/<int:id>/", methods=["GET"])
 @admin_login_req
@@ -384,10 +387,23 @@ def comment_del(id=None):
     ).paginate(page=1, per_page=10)
     return render_template("admin/comment_list.html", page_data=page_data)
 
-@admin.route("/moviecol/list")
+# 收藏列表
+@admin.route("/moviecol/list/<int:page>/", methods=["GET","POST"])
 @admin_login_req
-def moviecol_list():
-    return render_template("admin/moviecol_list.html")
+def moviecol_list(page=None):
+    if page ==None:
+        page =1
+    page_data = Moviecol.query.join(
+        Movie
+    ).join(
+        User
+    ).filter(
+        Movie.id == Moviecol.movie_id,
+        User.id == Moviecol.user_id
+    ).order_by(
+        Moviecol.addtime.desc()
+    ).paginate(page=page, per_page=10)
+    return render_template("admin/moviecol_list.html", page_data=page_data)
 
 
 @admin.route("/oplog/list")
